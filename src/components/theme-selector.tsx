@@ -20,12 +20,12 @@ export function ThemeSelect() {
 			<DropdownMenuTrigger asChild>
 				<Button
 					className={clsx(
-						'flex h-[48px] items-center justify-start gap-2 rounded-[--radius] border border-border bg-background p-2 px-3 text-sm font-medium text-muted-foreground hover:bg-secondary/30 hover:text-card-foreground'
+						'flex h-[48px] items-center justify-start gap-2 rounded-[--radius] bg-secondary p-2 px-3 text-sm font-medium text-foreground hover:bg-accent hover:text-foreground'
 					)}
 				>
-					<Sun className="h-6 w-6 rotate-0 scale-100  dark:rotate-90 dark:scale-0" />
+					<Sun className="mx-1 h-6 w-6 rotate-0 scale-100  dark:rotate-90 dark:scale-0" />
 					<Moon
-						className="absolute h-6 w-6 rotate-90 scale-0  dark:-rotate-0 dark:scale-100
+						className="mx-1 absolute h-6 w-6 rotate-90 scale-0  dark:-rotate-0 dark:scale-100
            "
 					/>
 				</Button>

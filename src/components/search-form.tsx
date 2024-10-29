@@ -6,97 +6,93 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useDispatch, useSelector } from 'react-redux';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import {
-	setInputValue,
-	setSliderValue,
-	setToggleValue,
+  setInputValue,
+  setSliderValue,
+  setToggleValue,
 } from '@/store/search-form-slice';
 import type { RootState } from '@/store/store';
+import { OptionButton } from './option-button';
 
 const formSchema = z.object({
-	inputA: z.string().nonempty('Input A cannot be empty'),
-	sliderLower: z.number().min(0).max(100),
-	sliderUpper: z.number().min(0).max(100),
-	toggleValue: z.boolean(),
-	inputB: z.string().nonempty('Input B cannot be empty'),
-	inputC: z.string().nonempty('Input C cannot be empty'),
+  inputA: z.string().nonempty('Input A cannot be empty'),
+  sliderLower: z.number().min(0).max(100),
+  sliderUpper: z.number().min(0).max(100),
+  toggleValue: z.boolean(),
+  inputB: z.string().nonempty('Input B cannot be empty'),
+  inputC: z.string().nonempty('Input C cannot be empty'),
+  inputD: z.string().nonempty('Input D cannot be empty'),
+  inputE: z.string().nonempty('Input E cannot be empty'),
+  inputF: z.string().nonempty('Input F cannot be empty'),
+  inputG: z.string().nonempty('Input G cannot be empty'),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
 export default function AdvancedFormWithDialogs() {
-	const [openB, setOpenB] = React.useState(false);
-	const [openC, setOpenC] = React.useState(false);
-	const dispatch = useDispatch();
-	const formState = useSelector((state: RootState) => state.searchForm);
+  const dispatch = useDispatch();
+  const formState = useSelector((state: RootState) => state.searchForm);
 
-	const {
-		control,
-		handleSubmit,
-		formState: { errors },
-		reset,
-		setValue,
-		watch,
-	} = useForm<FormData>({
-		resolver: zodResolver(formSchema),
-		defaultValues: {
-			inputA: formState.inputA,
-			sliderLower: formState.sliderLower,
-			sliderUpper: formState.sliderUpper,
-			toggleValue: formState.toggleValue,
-			inputB: formState.inputB,
-			inputC: formState.inputC,
-		},
-	});
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    watch,
+  } = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: formState,
+  });
 
-	// Watch the slider values for the range inputs
-	const sliderLower = watch('sliderLower');
-	const sliderUpper = watch('sliderUpper');
+  const sliderLower = watch('sliderLower');
+  const sliderUpper = watch('sliderUpper');
 
-	const onSubmit = (data: FormData) => {
-		dispatch(setInputValue({ field: 'inputA', value: data.inputA }));
-		dispatch(setInputValue({ field: 'inputB', value: data.inputB }));
-		dispatch(setInputValue({ field: 'inputC', value: data.inputC }));
-		dispatch(setSliderValue({ field: 'sliderLower', value: data.sliderLower }));
-		dispatch(setSliderValue({ field: 'sliderUpper', value: data.sliderUpper }));
-		dispatch(setToggleValue(data.toggleValue));
-		reset(data);
-	};
+  // Update Redux state when form values change
+  React.useEffect(() => {
+    const subscription = watch((value, { name, type }) => {
+      if (name && type === 'change') {
+        if (['inputA', 'inputB', 'inputC', 'inputD', 'inputE', 'inputF'].includes(name)) {
+          dispatch(setInputValue({ field: name, value: value[name] as string }));
+        } else if (name === 'sliderLower' || name === 'sliderUpper') {
+          dispatch(setSliderValue({ field: name, value: value[name] as number }));
+        } else if (name === 'toggleValue') {
+          dispatch(setToggleValue(value[name] as boolean));
+        }
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, dispatch]);
 
-	return (
-		<form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-			<div className="space-y-4">
-				<div>
-					<Label htmlFor="inputA">Input A</Label>
-					<Controller
-						name="inputA"
-						control={control}
-						render={({ field }) => (
-							<Input id="inputA" {...field} placeholder="Search" />
-						)}
-					/>
-					{errors.inputA && (
-						<p className="text-sm text-red-500 mt-1">{errors.inputA.message}</p>
-					)}
-				</div>
+  const onSubmit = (data: FormData) => {
+    console.log('Form submitted with data:', data);
+    // Additional submit logic if needed
+  };
 
-				<div>
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 w-full max-w-4xl mx-auto px-4 mb-4">
+      <div className="space-y-6">
+        {/* Input A Section */}
+        <div className="w-full">
+          <Label htmlFor="inputA">Input A</Label>
+          <Controller
+            name="inputA"
+            control={control}
+            render={({ field }) => (
+              <Input id="inputA" {...field} placeholder="Search" className="mt-1" />
+            )}
+          />
+          {errors.inputA && (
+            <p className="text-sm text-red-500 mt-1">{errors.inputA.message}</p>
+          )}
+        </div>
+
+        {/* Price Slider Section */}
+        <div className="w-full">
           <Label>Price</Label>
-          {/* Slider Component */}
-          <div className='mt-2'>
+          <div className="mt-4">
             <Controller
               name="sliderLower"
               control={control}
@@ -109,19 +105,17 @@ export default function AdvancedFormWithDialogs() {
                   render={({
                     field: { value: upperValue, onChange: onUpperChange },
                   }) => (
-                    <>
-                      <Slider
-                        min={0}
-                        max={100}
-                        step={1}
-                        value={[lowerValue, upperValue]}
-                        onValueChange={([lower, upper]) => {
-                          onLowerChange(lower);
-                          onUpperChange(upper);
-                        }}
-                        className="w-full" // Full width for the slider
-                      />
-                    </>
+                    <Slider
+                      min={0}
+                      max={100}
+                      step={1}
+                      value={[lowerValue, upperValue]}
+                      onValueChange={([lower, upper]) => {
+                        onLowerChange(lower);
+                        onUpperChange(upper);
+                      }}
+                      className="w-full"
+                    />
                   )}
                 />
               )}
@@ -129,7 +123,7 @@ export default function AdvancedFormWithDialogs() {
           </div>
 
           {/* Min/Max Input Fields */}
-          <div className="flex items-center justify-between mt-4">
+          <div className="flex flex-wrap justify-center items-center gap-2 mt-6">
             <Controller
               name="sliderLower"
               control={control}
@@ -171,100 +165,38 @@ export default function AdvancedFormWithDialogs() {
             />
           </div>
 
-          {/* Error Message */}
           {(errors.sliderLower || errors.sliderUpper) && (
             <p className="text-sm text-red-500 mt-1">Invalid slider range</p>
           )}
-				</div>
+        </div>
 
-				<div className="flex items-center space-x-2">
-					<Controller
-						name="toggleValue"
-						control={control}
-						render={({ field }) => (
-							<Switch
-								id="toggleValue"
-								checked={field.value}
-								onCheckedChange={field.onChange}
-							/>
-						)}
-					/>
-					<Label htmlFor="toggleValue">Toggle Switch</Label>
-				</div>
-			</div>
-     
-      {/* Buttons */}
-			<div className="space-x-4">
-				<Dialog open={openB} onOpenChange={setOpenB}>
-					<DialogTrigger asChild>
-						<Button variant="outline">Button B</Button>
-					</DialogTrigger>
-					<DialogContent>
-						<DialogHeader>
-							<DialogTitle>Input B</DialogTitle>
-							<DialogDescription>Enter a value for Input B</DialogDescription>
-						</DialogHeader>
-						<div className="py-4">
-							<Label htmlFor="inputB">Input B</Label>
-							<Controller
-								name="inputB"
-								control={control}
-								render={({ field }) => (
-									<Input
-										id="inputB"
-										{...field}
-										placeholder="Type something..."
-									/>
-								)}
-							/>
-							{errors.inputB && (
-								<p className="text-sm text-red-500 mt-1">
-									{errors.inputB.message}
-								</p>
-							)}
-						</div>
-						<DialogFooter>
-							<Button onClick={() => setOpenB(false)}>Close</Button>
-						</DialogFooter>
-					</DialogContent>
-				</Dialog>
+        {/* Toggle Switch Section */}
+        <div className="flex items-center space-x-2 pt-2">
+          <Controller
+            name="toggleValue"
+            control={control}
+            render={({ field }) => (
+              <Switch
+                id="toggleValue"
+                checked={field.value}
+                onCheckedChange={field.onChange}
+              />
+            )}
+          />
+          <Label htmlFor="toggleValue">Toggle Switch</Label>
+        </div>
+      </div>
 
-				<Dialog open={openC} onOpenChange={setOpenC}>
-					<DialogTrigger asChild>
-						<Button variant="outline">Button C</Button>
-					</DialogTrigger>
-					<DialogContent>
-						<DialogHeader>
-							<DialogTitle>Input C</DialogTitle>
-							<DialogDescription>Enter a value for Input C</DialogDescription>
-						</DialogHeader>
-						<div className="py-4">
-							<Label htmlFor="inputC">Input C</Label>
-							<Controller
-								name="inputC"
-								control={control}
-								render={({ field }) => (
-									<Input
-										id="inputC"
-										{...field}
-										placeholder="Type something..."
-									/>
-								)}
-							/>
-							{errors.inputC && (
-								<p className="text-sm text-red-500 mt-1">
-									{errors.inputC.message}
-								</p>
-							)}
-						</div>
-						<DialogFooter>
-							<Button onClick={() => setOpenC(false)}>Close</Button>
-						</DialogFooter>
-					</DialogContent>
-				</Dialog>
-			</div>
-
-			<Button type="submit">Search</Button>
-		</form>
-	);
+      {/* Option Buttons Section */}
+      <div className="flex flex-wrap justify-center gap-4">
+        <OptionButton label="Button B" inputName="inputB" control={control} errors={errors} />
+        <OptionButton label="Button C" inputName="inputC" control={control} errors={errors} />
+        <OptionButton label="Button D" inputName="inputD" control={control} errors={errors} />
+        <OptionButton label="Button E" inputName="inputE" control={control} errors={errors} />
+        <OptionButton label="Button F" inputName="inputF" control={control} errors={errors} />
+        <OptionButton label="Button G" inputName="inputG" control={control} errors={errors} />
+        <Button type="submit">Search</Button>
+      </div>
+    </form>
+  );
 }

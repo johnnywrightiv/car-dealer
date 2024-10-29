@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/navigation-menu';
 import { setGlobalSearchValue } from '@/store/global-search-slice';
 import type { RootState } from '@/store/store';
+import { GlobalSearch } from './global-search';
 
 const navItems = [
 	{
@@ -143,8 +144,10 @@ export function Navbar() {
 							height={80}
 							className="px-2"
 						/>
-						<span className="hidden font-bold sm:inline-block">ACME CARS</span>
+						<span className="font-bold inline-block">ACME CARS</span>
 					</Link>
+				</div>
+				<div className="px-2 flex items-center space-x-4">
 					<NavigationMenu className="hidden lg:flex">
 						<NavigationMenuList>
 							{navItems.map((item, index) => (
@@ -172,14 +175,13 @@ export function Navbar() {
 							))}
 						</NavigationMenuList>
 					</NavigationMenu>
-				</div>
-				<div className="px-2 flex items-center space-x-4">
-					{isSearchOpen ? (
+					<GlobalSearch />
+					{/* {isSearchOpen ? (
 						<div className="relative flex items-center">
 							<Input
 								type="search"
 								placeholder="Search..."
-								className="w-full py-2 pl-10 pr-4"
+								className="h-12 w-full py-2 pl-10 pr-4"
 								value={globalSearchValue}
 								onChange={handleSearchChange}
 							/>
@@ -202,7 +204,7 @@ export function Navbar() {
 							<Search className="h-5 w-5" />
 							<span className="sr-only">Search</span>
 						</Button>
-					)}
+					)} */}
 					<ThemeSelect />
 				</div>
 			</div>
