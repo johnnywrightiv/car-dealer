@@ -7,37 +7,60 @@ if (!process.env.NEXT_PUBLIC_SOCKET_URL) {
 	throw new Error('NEXT_PUBLIC_SOCKET_URL is not defined');
 }
 
-const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL);
+const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL, {
+	autoConnect: false, // Prevent auto connect until we manually trigger
+});
 
-export default function ChatDialog() {
+export default function Chat() {
 	const [message, setMessage] = useState('');
 	const [messages, setMessages] = useState<string[]>([]);
 	const [connected, setConnected] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [retryCount, setRetryCount] = useState(0);
 
 	useEffect(() => {
-		socket.on('connect', () => {
-			setConnected(true);
-			setError(null);
-			console.log('Connected to server');
-		});
+		// Retry connection logic
+		const connectWithRetry = () => {
+			socket.connect();
 
-		socket.on('connect_error', (err) => {
-			console.error('Connection error:', err);
-			setError('Failed to connect to chat server');
-			setConnected(false);
-		});
+			socket.on('connect', () => {
+				setConnected(true);
+				setError(null);
+				console.log('Connected to server');
+				setRetryCount(0); // Reset retry count on successful connection
+			});
 
-		socket.on('message', (message: string) => {
-			setMessages((prev) => [...prev, message]);
-		});
+			socket.on('connect_error', (err) => {
+				console.error('Connection error:', err);
+				setError('Failed to connect to chat server');
+				setConnected(false);
 
-		return () => {
-			socket.off('connect');
-			socket.off('connect_error');
-			socket.off('message');
+				// Retry after a delay if not connected
+				if (retryCount < 5) {
+					setRetryCount((prev) => prev + 1);
+					setTimeout(connectWithRetry, 3000); // Retry after 3 seconds
+				}
+			});
+
+			socket.on('message', (message: string) => {
+				setMessages((prev) => [...prev, message]);
+			});
+
+			return () => {
+				socket.off('connect');
+				socket.off('connect_error');
+				socket.off('message');
+			};
 		};
-	}, []);
+
+		// Try connecting when the component mounts
+		connectWithRetry();
+
+		// Cleanup on unmount
+		return () => {
+			socket.disconnect();
+		};
+	}, [retryCount]);
 
 	const sendMessage = (e: React.FormEvent) => {
 		e.preventDefault();

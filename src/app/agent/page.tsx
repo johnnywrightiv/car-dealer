@@ -1,3 +1,4 @@
+import AgentDashboard from '@/components/agent-dashboard';
 import { auth } from '@/server/auth';
 import React from 'react';
 
@@ -9,6 +10,7 @@ const Agent = async () => {
 			<h1 className="text-3xl">Agent Dashboard</h1>
 			<p className="text-lg">{session?.user?.email}</p>
 			<p className="">this route is protected with src/middleware.ts</p>
+			<AgentDashboard />
 		</main>
 	);
 };
