@@ -5,7 +5,7 @@ import { AuthError } from 'next-auth';
 
 const getUserByEmail = async (email: string) => {
 	try {
-		const user = await db.user.findUniqe({
+		const user = await db.user.findUnique({
 			where: {
 				email,
 			},
@@ -29,31 +29,30 @@ export const logout = async () => {
 	revalidatePath('/');
 };
 
-
 export const loginWithCreds = async (formData: FormData) => {
 	const rawFormData = {
 		email: formData.get('email'),
 		password: formData.get('password'),
-		role: "AGENT",
-		redirectTo: '/agent'
+		role: 'AGENT',
+		redirectTo: '/agent',
 	};
 
-	const existingUser = await getUserByEmail(formData.get('email') as string)
+	const existingUser = await getUserByEmail(formData.get('email') as string);
 	console.log(existingUser);
 
 	try {
-		const user = await signIn("credentials", rawFormData)
+		const user = await signIn('credentials', rawFormData);
 	} catch (error: any) {
 		if (error instanceof AuthError) {
 			switch (error.type) {
-				case "CredentialsSignin":
-					return { error: "Invalid credentials"}
+				case 'CredentialsSignin':
+					return { error: 'Invalid credentials' };
 				default:
-					return { error: "Something went wrong!"}
+					return { error: 'Something went wrong!' };
 			}
 		}
 
 		throw error;
-	}	
-	revalidatePath('/agent')
+	}
+	revalidatePath('/agent');
 };

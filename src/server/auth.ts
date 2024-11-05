@@ -20,10 +20,14 @@ export const {
 			clientSecret: process.env.AUTH_GITHUB_SECRET,
 		}),
 		Credentials({
-			name: "Credentials",
+			name: 'Credentials',
 			credentials: {
-				email: { label: 'Email', type: 'email', placeholder: 'email@example.com'},
-				password: { label: 'Password', type: 'password' }
+				email: {
+					label: 'Email',
+					type: 'email',
+					placeholder: 'email@example.com',
+				},
+				password: { label: 'Password', type: 'password' },
 			},
 			authorize: async (credentials) => {
 				if (!credentials || !credentials.email || !credentials.password) {
@@ -37,23 +41,26 @@ export const {
 					where: {
 						email,
 					},
-				})
+				});
 
 				if (!user) {
 					user = await db.user.create({
 						data: {
 							email,
 							hashedPassword: hash,
-						}
-					})
+						},
+					});
 				} else {
-					const isMatch = bcrypt.compareSync(credentials.password as string, user.hashedPassword)
+					const isMatch = bcrypt.compareSync(
+						credentials.password as string,
+						user.hashedPassword
+					);
 					if (!isMatch) {
-						throw new Error("Invalid credentials")
+						throw new Error('Invalid credentials');
 					}
 				}
 				return user;
-			}
+			},
 		}),
 	],
 });
