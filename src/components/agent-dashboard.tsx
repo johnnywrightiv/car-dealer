@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import Chat from '@/components/chat-dialog';
+import Chat from '@/components/chat-window';
 import { UserCircle } from 'lucide-react';
 
 interface ChatSession {

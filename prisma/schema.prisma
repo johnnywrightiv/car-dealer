@@ -29,12 +29,14 @@ model User {
   accounts      Account[]
   sessions      Session[]
   role          UserRole        @default(USER)
-  // Optional for WebAuthn support
   Authenticator Authenticator[]
- 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  
+  // Reverse relation to ChatSession as an agent
+  chatSessions  ChatSession[]   @relation("AgentChatSessions")
 }
+
  
 model Account {
   id                String  @id @default(auto()) @map("_id") @db.ObjectId
@@ -92,4 +94,33 @@ model Authenticator {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
  
   @@unique([userId, credentialID])
+}
+
+enum ChatStatus {
+  ACTIVE
+  CLOSED
+  WAITING
+}
+
+model ChatSession {
+  id        String      @id @default(auto()) @map("_id") @db.ObjectId
+  status    ChatStatus  @default(WAITING)
+  visitor   String
+  email     String
+  phone     String?
+  agentId   String?     @db.ObjectId
+  agent     User?       @relation("AgentChatSessions", fields: [agentId], references: [id])
+  messages  Message[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
+
+model Message {
+  id            String      @id @default(auto()) @map("_id") @db.ObjectId
+  content       String
+  senderId      String
+  isAgent       Boolean     @default(false)
+  chatSessionId String      @db.ObjectId
+  chatSession   ChatSession @relation(fields: [chatSessionId], references: [id], onDelete: Cascade)
+  createdAt     DateTime    @default(now())
 }

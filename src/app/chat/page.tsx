@@ -1,4 +1,4 @@
-import ChatDialog from '@/components/chat-dialog';
+import ChatDialog from '@/components/chat-window';
 
 const Chat = () => {
 	return (
